@@ -138,10 +138,12 @@ if uploaded_file is not None:
     df = pd.read_csv(uploaded_file)
     st.markdown('Input Dataset Preview')
     st.write(df)
+    st.balloons()
     build_model(df)
 else:
     st.info('Waiting for CSV file...')
     if st.button('Load example data'):
         df = pd.read_csv("GSE137140trimmedData.csv")
         st.write(df)
+        st.balloons()
         build_model(df)
