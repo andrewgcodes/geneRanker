@@ -117,7 +117,7 @@ st.subheader('Dataset')
 
 if uploaded_file is not None:
     df = pd.read_csv(uploaded_file)
-    st.markdown('Input Dataset Preview')
+    st.markdown('Dataset Preview')
     st.write(df)
     st.balloons()
     build_model(df)
