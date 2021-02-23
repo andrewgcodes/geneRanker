@@ -129,7 +129,7 @@ with st.sidebar.header('Upload Data (CSV format)'):
 
 
 with st.sidebar.header('Adjust Parameters'):
-    split_size = st.sidebar.slider('Train Test Split Ratio', 1, 99, 10, 1)
+    split_size = st.sidebar.slider('Percent of Data to use as Testing Data', 0.1, 0.9, 0.5, 0.01)
     parameter_n_estimators = st.sidebar.slider('Number of Estimators to Use', 0, 1000, 100, 100)
 
 st.subheader('Dataset')
