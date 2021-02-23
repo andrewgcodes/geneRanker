@@ -4,7 +4,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import mean_squared_error, r2_score
 from sklearn.datasets import load_diabetes, load_boston
-import numpy as np # linear algebra
+import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn import svm
@@ -33,21 +33,12 @@ import random
 import warnings
 warnings.filterwarnings('ignore')
 
-# Input data files are available in the "../input/" directory.
-# For example, running this (by clicking run or pressing Shift+Enter) will list the files in the input directory
-
-#---------------------------------#
-# Page layout
-## Page expands to full width
 st.set_page_config(page_title='Gene Expression Data Biomarker Selection Tool',
     layout='wide')
 
-#---------------------------------#
-# Model building
 def build_model(df):
-    #X = df.iloc[:,:-1] # Using all column except for the last column as X
     X=df[df.columns[0:-1]]
-    Y = df.iloc[:,-1] # Selecting the last column as Y
+    Y = df.iloc[:,-1]
 
     X= (X - np.min(X))/(np.max(X) - np.min(X))
 
@@ -57,7 +48,6 @@ def build_model(df):
     st.write('label (should be 0 for control, 1 for experimental)')
     st.info(Y.name)
 
-    # Data splitting
     X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=split_size)
 
     rf = RandomForestClassifier(n_estimators=parameter_n_estimators)
@@ -73,14 +63,6 @@ def build_model(df):
     feature_imp = pd.Series(rf.feature_importances_,index=X.columns).sort_values(ascending=False)
     st.subheader('Features Ranked by Importance')
     st.write(feature_imp)
-    #st.subheader('Top')
-
-    #feature_imp = feature_imp[:10]
-    #st.write(list(feature_imp.index))
-#    selectedColumns =list(feature_imp.index)
-    #X =X.loc[selectedColumns]
-#    Y=Y.loc[selectedColumns]
-#    X_train,X_test,Y_train,Y_test=train_test_split(X,Y,test_size=split_size,random_state=1)
 
     classifiers = [LogisticRegression(random_state=1234), GaussianNB(), KNeighborsClassifier(), DecisionTreeClassifier(random_state=1234), RandomForestClassifier(random_state=1234)]
     result_table = pd.DataFrame(columns=['classifiers', 'fpr','tpr','auc'])
@@ -96,7 +78,6 @@ def build_model(df):
                                         'tpr':tpr,
                                         'auc':auc}, ignore_index=True)
 
-# Set name of the classifiers as index labels
     result_table.set_index('classifiers', inplace=True)
 
     fig = plt.figure(figsize=(8,6))
