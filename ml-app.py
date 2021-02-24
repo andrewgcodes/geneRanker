@@ -133,9 +133,9 @@ st.write("""
 ## Automatic Machine Learning and Feature Selection on Omics Data
 
 """)
-image = Image.open('logo.png')
+#image = Image.open('logo.png')
 
-st.sidebar.image(image, width=300,output_format='png')
+#st.sidebar.image(image, width=300,output_format='png')
 
 with st.sidebar.header('Upload Data (CSV only)'):
     uploaded_file = st.sidebar.file_uploader("Upload CSV file (features in columns, label in final column, rows are samples)", type=["csv"])
