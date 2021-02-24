@@ -42,28 +42,55 @@ def build_model(df):
 
     X= (X - np.min(X))/(np.max(X) - np.min(X))
 
-    st.markdown('Info')
     st.write('features (first 5 shown) ')
     st.info(list(X.columns)[:5])
     st.write('label (should be 0 for control, 1 for experimental)')
     st.info(Y.name)
-
+    st.subheader('Correlation Heatmap')
+    corr = df.corr()
+    mask = np.zeros_like(corr)
+    mask[np.triu_indices_from(mask)] = True
+    with sns.axes_style("white"):
+        f, ax = plt.subplots(figsize=(7, 5))
+        ax = sns.heatmap(corr, mask=mask, vmax=1, square=True,cmap="Blues")
+    st.pyplot(f)
     X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=split_size)
+    plt.clf()
+    rf = RandomForestClassifier(n_estimators=parameter_n_estimators,
+        random_state=parameter_random_state,
+        max_features=parameter_max_features,
+        n_jobs=parameter_n_jobs)
 
-    rf = RandomForestClassifier(n_estimators=parameter_n_estimators)
     rf.fit(X_train, y_train)
 
-    st.subheader('2. Model Performance')
+    st.subheader('Random Forest Metrics')
     y_pred=rf.predict(X_test)
     st.write("Accuracy:",metrics.accuracy_score(y_test, y_pred))
 
+    st.write("Precision:",metrics.precision_score(y_test, y_pred))
+    st.write("Recall:",metrics.recall_score(y_test, y_pred))
+    st.write("F:",metrics.f1_score(y_test, y_pred))
+    st.write("Confusion Matrix")
+    st.write(metrics.confusion_matrix(y_test, y_pred))
+    st.write("ROC AUC based on y_pred and y_test",metrics.roc_auc_score(y_test, y_pred))
 
-    feature_list = ["MIMAT0000101", "MIMAT0015072","MIMAT0004597","MIMAT0000425","MIMAT0000065","MIMAT0002835","MIMAT0000067","MIMAT0000681","MIMAT0000691","MIMAT0000762","MIMAT0002174","MIMAT0000703","MIMAT0000231"]
+
+    from sklearn.metrics import plot_confusion_matrix
+    plot_confusion_matrix(rf, X_test, y_test,cmap="Blues")
+    st.pyplot(plt)
 
     feature_imp = pd.Series(rf.feature_importances_,index=X.columns).sort_values(ascending=False)
     st.subheader('Features Ranked by Importance')
     st.write(feature_imp)
+    plt.clf()
+    sns.barplot(x=feature_imp, y=feature_imp.index)
 
+    # Add labels to your graph
+    plt.xlabel('Feature Importance Score')
+    plt.ylabel('miRNA')
+    plt.title("Importance of Each miRNA For Classification")
+    plt.legend()
+    st.pyplot(plt)
     classifiers = [LogisticRegression(random_state=1234), GaussianNB(), KNeighborsClassifier(), DecisionTreeClassifier(random_state=1234), RandomForestClassifier(random_state=1234)]
     result_table = pd.DataFrame(columns=['classifiers', 'fpr','tpr','auc'])
     for cls in classifiers:
@@ -97,8 +124,9 @@ def build_model(df):
 
     plt.title('ROC Curve for Five Machine Learning Classifiers', fontweight='bold', fontsize=15)
     plt.legend(prop={'size':13}, loc='lower right')
-
+    st.subheader('ROC Curves')
     st.pyplot(plt)
+    st.write("Thank you for using this tool.")
 #---------------------------------#
 st.write("""
 # Gene Expression Data Biomarker Selection Tool
@@ -110,8 +138,11 @@ with st.sidebar.header('Upload Data (CSV format)'):
 
 
 with st.sidebar.header('Adjust Parameters'):
-    split_size = st.sidebar.slider('Percent of Data to use as Testing Data', 0.1, 0.9, 0.5, 0.01)
-    parameter_n_estimators = st.sidebar.slider('Number of Estimators to Use', 0, 1000, 100, 100)
+    split_size = st.sidebar.slider('Percent of Data to use as Testing Data', 0.05, 0.95, 0.5, 0.01)
+    parameter_n_estimators = st.sidebar.slider('Number of estimators', 0, 1000, 100, 100)
+    parameter_max_features = st.sidebar.select_slider('Max features', options=['auto', 'sqrt', 'log2'])
+    parameter_random_state = st.sidebar.slider('Seed number', 0, 1000, 500, 1)
+    parameter_n_jobs = st.sidebar.select_slider('Number of jobs to run in parallel', options=[1, -1])
 
 st.subheader('Dataset')
 
@@ -125,6 +156,7 @@ else:
     st.info('Waiting for CSV file...')
     if st.button('Load example data'):
         df = pd.read_csv("GSE137140trimmedData.csv")
+        st.write("Example data comes from GSE137140, a microRNA expression profiling dataset of lung cancer patients. 13 features are pre-selected to reduce computing time.")
         st.write(df)
         st.balloons()
         build_model(df)
