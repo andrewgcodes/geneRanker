@@ -33,15 +33,15 @@ import random
 import warnings
 warnings.filterwarnings('ignore')
 
-st.set_page_config(page_title='Gene Expression Data Biomarker Selection Tool',
+st.set_page_config(page_title='Biomarker Genie',
     layout='wide')
 
 def build_model(df):
     X=df[df.columns[0:-1]]
     Y = df.iloc[:,-1]
-
-    X= (X - np.min(X))/(np.max(X) - np.min(X))
-
+    if(agree):
+        X= (X - np.min(X))/(np.max(X) - np.min(X))
+    st.write('Please ensure that the features and label columns look correct')
     st.write('features (first 5 shown) ')
     st.info(list(X.columns)[:5])
     st.write('label (should be 0 for control, 1 for experimental)')
@@ -129,15 +129,18 @@ def build_model(df):
     st.write("Thank you for using this tool.")
 #---------------------------------#
 st.write("""
-# Gene Expression Data Biomarker Selection Tool
+# Biomarker Genie
+## Automatic Machine Learning and Feature Selection on Omics Data
 
 """)
 
-with st.sidebar.header('Upload Data (CSV format)'):
+with st.sidebar.header('Upload Data (CSV only)'):
     uploaded_file = st.sidebar.file_uploader("Upload CSV file (features in columns, label in final column, rows are samples)", type=["csv"])
+    st.sidebar.write("View/download [example data](https://drive.google.com/file/d/1GsPdKfSpa9wLLPRqK4pF-NbBG8cPjS4G/view?usp=sharing)")
 
 
-with st.sidebar.header('Adjust Parameters'):
+with st.sidebar.header('Adjust Settings'):
+    agree = st.sidebar.checkbox('Normalize Data?')
     split_size = st.sidebar.slider('Percent of Data to use as Testing Data', 0.05, 0.95, 0.5, 0.01)
     parameter_n_estimators = st.sidebar.slider('Number of estimators', 0, 1000, 100, 100)
     parameter_max_features = st.sidebar.select_slider('Max features', options=['auto', 'sqrt', 'log2'])
