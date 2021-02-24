@@ -63,7 +63,7 @@ def build_model(df):
 
     rf.fit(X_train, y_train)
 
-    st.subheader('Random Forest Metrics')
+    st.subheader('Random Forest Metrics Result')
     y_pred=rf.predict(X_test)
     st.write("Accuracy:",metrics.accuracy_score(y_test, y_pred))
 
