@@ -28,6 +28,10 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import roc_curve, roc_auc_score
 from sklearn import metrics
 from PIL import Image
+import pandas_profiling
+import streamlit_pandas_profiling
+from pandas_profiling import ProfileReport
+from streamlit_pandas_profiling import st_profile_report
 
 import random
 import warnings
@@ -37,8 +41,12 @@ st.set_page_config(page_title='Biomarker Genie',
     layout='wide')
 
 def build_model(df):
+
     X=df[df.columns[0:-1]]
     Y = df.iloc[:,-1]
+    if selecty:
+        featurelist = st.multiselect('Features to use (pick at least one to fix the ValueError)',X.columns)
+        X=df[featurelist]
     if(agree):
         X= (X - np.min(X))/(np.max(X) - np.min(X))
     st.write('Please ensure that the features and label columns look correct')
@@ -46,14 +54,23 @@ def build_model(df):
     st.info(list(X.columns)[:5])
     st.write('label (should be 0 for control, 1 for experimental)')
     st.info(Y.name)
-    st.subheader('Correlation Heatmap')
-    corr = df.corr()
-    mask = np.zeros_like(corr)
-    mask[np.triu_indices_from(mask)] = True
-    with sns.axes_style("white"):
-        f, ax = plt.subplots(figsize=(7, 5))
-        ax = sns.heatmap(corr, mask=mask, vmax=1, square=True,cmap="Blues")
-    st.pyplot(f)
+    if perfil:
+        pr = ProfileReport(df, explorative=True,minimal=True,progress_bar=True)
+        st.header('**Input DataFrame**')
+        st.write(df)
+        st.write('---')
+        st.header('**Pandas Profiling Report**')
+        st.write('This can take a while, please be patient.')
+        st_profile_report(pr)
+    if(selecty == False):
+        st.subheader('Correlation Heatmap')
+        corr = df.corr()
+        mask = np.zeros_like(corr)
+        mask[np.triu_indices_from(mask)] = True
+        with sns.axes_style("white"):
+            f, ax = plt.subplots(figsize=(7, 5))
+            ax = sns.heatmap(corr, mask=mask, vmax=1, square=True,cmap="Blues")
+        st.pyplot(f)
     X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=split_size)
     plt.clf()
     rf = RandomForestClassifier(n_estimators=parameter_n_estimators,
@@ -143,7 +160,10 @@ with st.sidebar.header('Upload Data (CSV only)'):
 
 
 with st.sidebar.header('Adjust Settings'):
-    agree = st.sidebar.checkbox('Normalize Data?')
+    agree = st.sidebar.checkbox('Normalize data?')
+    perfil = st.sidebar.checkbox('Create Profile Report? (avoid on large datasets with many features)')
+    selecty = st.sidebar.checkbox('Select features manually?')
+
     split_size = st.sidebar.slider('Percent of Data to use as Testing Data', 0.05, 0.95, 0.5, 0.01)
     parameter_n_estimators = st.sidebar.slider('Number of estimators', 0, 1000, 100, 100)
     parameter_max_features = st.sidebar.select_slider('Max features', options=['auto', 'sqrt', 'log2'])
@@ -162,7 +182,7 @@ else:
     st.info('Waiting for CSV file...')
     if st.button('Load example data'):
         df = pd.read_csv("GSE137140trimmedData.csv")
-        st.write("Example data comes from GSE137140, a microRNA expression profiling dataset of lung cancer patients. 13 features are pre-selected to reduce computing time.")
+        st.write("Example data comes from GSE137140, a microRNA expression profiling dataset of lung cancer patients. 13 features are pre-selected to reduce computing time. Please be aware that the manual feature selection method does not work for the example dataset due to Streamlit structure. You should upload your own data if you want to use manual feature selection.")
         st.write(df)
         st.balloons()
         build_model(df)
