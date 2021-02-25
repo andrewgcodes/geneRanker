@@ -44,24 +44,23 @@ def build_model(df):
 
     X=df[df.columns[0:-1]]
     Y = df.iloc[:,-1]
+    if(agree):
+        X= (X - np.min(X))/(np.max(X) - np.min(X))
+    if perfil:
+        pr = ProfileReport(df, explorative=True,minimal=True,progress_bar=True)
+        st.header('**Pandas Profiling Report**')
+        st.write('This can take a while, please be patient.')
+        st_profile_report(pr)
     if selecty:
         featurelist = st.multiselect('Features to use (pick at least one to fix the ValueError)',X.columns)
         X=df[featurelist]
-    if(agree):
-        X= (X - np.min(X))/(np.max(X) - np.min(X))
+
     st.write('Please ensure that the features and label columns look correct')
     st.write('features (first 5 shown) ')
     st.info(list(X.columns)[:5])
     st.write('label (should be 0 for control, 1 for experimental)')
     st.info(Y.name)
-    if perfil:
-        pr = ProfileReport(df, explorative=True,minimal=True,progress_bar=True)
-        st.header('**Input DataFrame**')
-        st.write(df)
-        st.write('---')
-        st.header('**Pandas Profiling Report**')
-        st.write('This can take a while, please be patient.')
-        st_profile_report(pr)
+
     if(selecty == False):
         st.subheader('Correlation Heatmap')
         corr = df.corr()
