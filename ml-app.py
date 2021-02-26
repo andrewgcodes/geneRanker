@@ -103,8 +103,8 @@ def build_model(df):
 
     # Add labels to your graph
     plt.xlabel('Feature Importance Score')
-    plt.ylabel('miRNA')
-    plt.title("Importance of Each miRNA For Classification")
+    plt.ylabel('Feature')
+    plt.title("Importance of Each Feature For Classification")
     plt.legend()
     st.pyplot(plt)
     classifiers = [LogisticRegression(random_state=1234), GaussianNB(), KNeighborsClassifier(), DecisionTreeClassifier(random_state=1234), RandomForestClassifier(random_state=1234)]
