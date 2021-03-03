@@ -62,14 +62,17 @@ def build_model(df):
     st.info(Y.name)
 
     if(selecty == False):
-        st.subheader('Correlation Heatmap')
-        corr = df.corr()
-        mask = np.zeros_like(corr)
-        mask[np.triu_indices_from(mask)] = True
-        with sns.axes_style("white"):
-            f, ax = plt.subplots(figsize=(7, 5))
-            ax = sns.heatmap(corr, mask=mask, vmax=1, square=True,cmap="Blues")
-        st.pyplot(f)
+        with st.echo():
+            st.subheader('Correlation Heatmap')
+            corr = df.corr()
+            mask = np.zeros_like(corr)
+            mask[np.triu_indices_from(mask)] = True
+            with sns.axes_style("white"):
+                f, ax = plt.subplots(figsize=(7, 5))
+                ax = sns.heatmap(corr, mask=mask, vmax=1, square=True,cmap="Blues")
+            st.pyplot(f)
+
+    
     X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=split_size)
     plt.clf()
     rf = RandomForestClassifier(n_estimators=parameter_n_estimators,
@@ -107,19 +110,20 @@ def build_model(df):
     plt.title("Importance of Each Feature For Classification")
     plt.legend()
     st.pyplot(plt)
-    classifiers = [LogisticRegression(random_state=1234), GaussianNB(), KNeighborsClassifier(), DecisionTreeClassifier(random_state=1234), RandomForestClassifier(random_state=1234)]
-    result_table = pd.DataFrame(columns=['classifiers', 'fpr','tpr','auc'])
-    for cls in classifiers:
-        model = cls.fit(X_train, y_train)
-        yproba = model.predict_proba(X_test)[::,1]
+    with st.echo():
+        classifiers = [LogisticRegression(random_state=1234), GaussianNB(), KNeighborsClassifier(), DecisionTreeClassifier(random_state=1234), RandomForestClassifier(random_state=1234)]
+        result_table = pd.DataFrame(columns=['classifiers', 'fpr','tpr','auc'])
+        for cls in classifiers:
+            model = cls.fit(X_train, y_train)
+            yproba = model.predict_proba(X_test)[::,1]
 
-        fpr, tpr, _ = roc_curve(y_test,  yproba)
-        auc = roc_auc_score(y_test, yproba)
+            fpr, tpr, _ = roc_curve(y_test,  yproba)
+            auc = roc_auc_score(y_test, yproba)
 
-        result_table = result_table.append({'classifiers':cls.__class__.__name__,
-                                        'fpr':fpr,
-                                        'tpr':tpr,
-                                        'auc':auc}, ignore_index=True)
+            result_table = result_table.append({'classifiers':cls.__class__.__name__,
+                                            'fpr':fpr,
+                                            'tpr':tpr,
+                                            'auc':auc}, ignore_index=True)
 
     result_table.set_index('classifiers', inplace=True)
 
