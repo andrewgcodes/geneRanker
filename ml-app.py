@@ -65,11 +65,11 @@ def build_model(df):
         with st.echo():
             st.subheader('Correlation Heatmap')
             corr = df.corr()
-            mask = np.zeros_like(corr)
-            mask[np.triu_indices_from(mask)] = True
+            ros = np.zeros_like(corr)
+            ros[np.triu_indices_from(ros)] = True
             with sns.axes_style("white"):
                 f, ax = plt.subplots(figsize=(7, 5))
-                ax = sns.heatmap(corr, mask=mask, vmax=1, square=True,cmap="Blues")
+                ax = sns.heatmap(corr, mask=ros, vmax=1, square=True,cmap="Blues")
             st.pyplot(f)
 
     
@@ -77,18 +77,17 @@ def build_model(df):
     plt.clf()
     rf = RandomForestClassifier(n_estimators=parameter_n_estimators,
         random_state=parameter_random_state,
-        max_features=parameter_max_features,
-        n_jobs=parameter_n_jobs)
+        max_features=parameter_max_features)
 
     rf.fit(X_train, y_train)
 
     st.subheader('Random Forest Metrics Result')
     y_pred=rf.predict(X_test)
-    st.write("Accuracy:",metrics.accuracy_score(y_test, y_pred))
+    st.write("Accuracy: ",metrics.accuracy_score(y_test, y_pred))
 
-    st.write("Precision:",metrics.precision_score(y_test, y_pred))
-    st.write("Recall:",metrics.recall_score(y_test, y_pred))
-    st.write("F:",metrics.f1_score(y_test, y_pred))
+    st.write("Precision: ",metrics.precision_score(y_test, y_pred))
+    st.write("Recall: ",metrics.recall_score(y_test, y_pred))
+    st.write("F1 Score: ",metrics.f1_score(y_test, y_pred))
     st.write("Confusion Matrix")
     st.write(metrics.confusion_matrix(y_test, y_pred))
     st.write("ROC AUC based on y_pred and y_test",metrics.roc_auc_score(y_test, y_pred))
@@ -100,11 +99,9 @@ def build_model(df):
 
     feature_imp = pd.Series(rf.feature_importances_,index=X.columns).sort_values(ascending=False)
     st.subheader('Features Ranked by Importance')
-    st.write(feature_imp)
     plt.clf()
     sns.barplot(x=feature_imp, y=feature_imp.index)
 
-    # Add labels to your graph
     plt.xlabel('Feature Importance Score')
     plt.ylabel('Feature')
     plt.title("Importance of Each Feature For Classification")
@@ -112,7 +109,7 @@ def build_model(df):
     st.pyplot(plt)
     with st.echo():
         classifiers = [LogisticRegression(random_state=1234), GaussianNB(), KNeighborsClassifier(), DecisionTreeClassifier(random_state=1234), RandomForestClassifier(random_state=1234)]
-        result_table = pd.DataFrame(columns=['classifiers', 'fpr','tpr','auc'])
+        results1 = pd.DataFrame(columns=['classifiers', 'fpr','tpr','auc'])
         for cls in classifiers:
             model = cls.fit(X_train, y_train)
             yproba = model.predict_proba(X_test)[::,1]
@@ -120,30 +117,30 @@ def build_model(df):
             fpr, tpr, _ = roc_curve(y_test,  yproba)
             auc = roc_auc_score(y_test, yproba)
 
-            result_table = result_table.append({'classifiers':cls.__class__.__name__,
+            results1 = results1.append({'classifiers':cls.__class__.__name__,
                                             'fpr':fpr,
                                             'tpr':tpr,
                                             'auc':auc}, ignore_index=True)
 
-    result_table.set_index('classifiers', inplace=True)
+    results1.set_index('classifiers', inplace=True)
 
     fig = plt.figure(figsize=(8,6))
 
-    for i in result_table.index:
-        plt.plot(result_table.loc[i]['fpr'],
-                 result_table.loc[i]['tpr'],
-                 label="{}, AUC={:.3f}".format(i, result_table.loc[i]['auc']))
+    for i in results1.index:
+        plt.plot(results1.loc[i]['fpr'],
+                 results1.loc[i]['tpr'],
+                 label="{}, AUC={:.3f}".format(i, results1.loc[i]['auc']))
 
     plt.plot([0,1], [0,1], color='orange', linestyle='--')
 
     plt.xticks(np.arange(0.0, 1.1, step=0.1))
-    plt.xlabel("False Positive Rate", fontsize=15)
+    plt.xlabel("False Positive Rate (FPR)", fontsize=15)
 
     plt.yticks(np.arange(0.0, 1.1, step=0.1))
-    plt.ylabel("True Positive Rate", fontsize=15)
+    plt.ylabel("True Positive Rate (TPR)", fontsize=15)
 
-    plt.title('ROC Curve for Five Machine Learning Classifiers', fontweight='bold', fontsize=15)
-    plt.legend(prop={'size':13}, loc='lower right')
+    plt.title('ROC Curve for Five Machine Learning Classifiers', fontsize=10)
+    plt.legend(prop={'size':10}, loc='lower right')
     st.subheader('ROC Curves')
     st.pyplot(plt)
     st.write("Thank you for using this tool.")
@@ -168,10 +165,11 @@ with st.sidebar.header('Adjust Settings'):
     selecty = st.sidebar.checkbox('Select features manually?')
 
     split_size = st.sidebar.slider('Percent of Data to use as Testing Data', 0.05, 0.95, 0.5, 0.01)
-    parameter_n_estimators = st.sidebar.slider('Number of estimators', 0, 1000, 100, 100)
-    parameter_max_features = st.sidebar.select_slider('Max features', options=['auto', 'sqrt', 'log2'])
+
+    #Credit to Chanin Nantasenamat (The Data Professor for hyperparameter optimization)
+    parameter_n_estimators = st.sidebar.slider('Estimators', 0, 1000, 100, 100)
+    parameter_max_features = st.sidebar.select_slider('Max features', options=['auto', 'sqrt', 'log2']) 
     parameter_random_state = st.sidebar.slider('Seed number', 0, 1000, 500, 1)
-    parameter_n_jobs = st.sidebar.select_slider('Number of jobs to run in parallel', options=[1, -1])
 
 st.subheader('Dataset')
 
