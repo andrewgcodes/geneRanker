@@ -101,7 +101,6 @@ def build_model(df):
     plt.clf()
     sns.barplot(x=feature_imp, y=feature_imp.index)
 
-    # Add labels to your graph
     plt.xlabel('Feature Importance Score')
     plt.ylabel('Feature')
     plt.title("Importance of Each Feature For Classification")
@@ -143,15 +142,13 @@ def build_model(df):
     st.subheader('ROC Curves')
     st.pyplot(plt)
     st.write("Thank you for using this tool.")
+    
 #---------------------------------#
 st.write("""
 # Biomarker Genie
 ## Automatic Machine Learning and Feature Selection on Omics Data
 
 """)
-#image = Image.open('logo.png')
-
-#st.sidebar.image(image, width=300,output_format='png')
 
 with st.sidebar.header('Upload Data (CSV only)'):
     uploaded_file = st.sidebar.file_uploader("Upload CSV file (features in columns, label in final column, rows are samples)", type=["csv"])
@@ -162,7 +159,7 @@ with st.sidebar.header('Adjust Settings'):
     agree = st.sidebar.checkbox('Normalize data?')
     perfil = st.sidebar.checkbox('Create Profile Report? (avoid on large datasets with many features)')
     selecty = st.sidebar.checkbox('Select features manually?')
-
+    #Credit to Chanin Nantasenamat https://medium.com/@chanin.nantasenamat for hyperparameter optimization code 
     split_size = st.sidebar.slider('Percent of Data to use as Testing Data', 0.05, 0.95, 0.5, 0.01)
     parameter_n_estimators = st.sidebar.slider('Number of estimators', 0, 1000, 100, 100)
     parameter_max_features = st.sidebar.select_slider('Max features', options=['auto', 'sqrt', 'log2'])
