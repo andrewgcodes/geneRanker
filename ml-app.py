@@ -37,7 +37,7 @@ import random
 import warnings
 warnings.filterwarnings('ignore')
 
-st.set_page_config(page_title='Biomarker Genie',
+st.set_page_config(page_title='Biomarker GENiE',
     layout='wide')
 
 def build_model(df):
@@ -72,7 +72,7 @@ def build_model(df):
                 ax = sns.heatmap(corr, mask=ros, vmax=1, square=True,cmap="Blues")
             st.pyplot(f)
 
-    
+
     X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=split_size)
     plt.clf()
     rf = RandomForestClassifier(n_estimators=parameter_n_estimators,
@@ -102,7 +102,6 @@ def build_model(df):
     plt.clf()
     sns.barplot(x=feature_imp, y=feature_imp.index)
 
-    # Add labels to your graph
     plt.xlabel('Feature Importance Score')
     plt.ylabel('Feature')
     plt.title("Importance of Each Feature For Classification")
@@ -144,24 +143,24 @@ def build_model(df):
     plt.legend(prop={'size':10}, loc='lower right')
     st.subheader('ROC Curves')
     st.pyplot(plt)
-    st.write("Thank you for using this tool.")
-#---------------------------------#
+    
 st.write("""
-# Biomarker Genie
-## Automatic Machine Learning and Feature Selection on Omics Data
+# Biomarker GENiE
+## Automatic Machine Learning and Feature Selection on Gene Expression Data
 
 """)
-#image = Image.open('logo.png')
+st.write("Github code: https://github.com/andrewgcodes/geneRanker")
+image = Image.open('logo.png')
 
-#st.sidebar.image(image, width=300,output_format='png')
+st.sidebar.image(image, width=120,output_format='png')
 
 with st.sidebar.header('Upload Data (CSV only)'):
-    uploaded_file = st.sidebar.file_uploader("Upload CSV file (features in columns, label in final column, rows are samples)", type=["csv"])
+    uploaded_file = st.sidebar.file_uploader("Upload CSV file (features in columns, binary label (1 and 0) in final column, rows are samples)", type=["csv"])
     st.sidebar.write("View/download [example data](https://drive.google.com/file/d/1GsPdKfSpa9wLLPRqK4pF-NbBG8cPjS4G/view?usp=sharing)")
 
 
 with st.sidebar.header('Adjust Settings'):
-    agree = st.sidebar.checkbox('Normalize data?')
+    agree = st.sidebar.checkbox('Normalize data? (min-max)')
     perfil = st.sidebar.checkbox('Create Profile Report? (avoid on large datasets with many features)')
     selecty = st.sidebar.checkbox('Select features manually?')
 
@@ -169,7 +168,7 @@ with st.sidebar.header('Adjust Settings'):
 
     #Credit to Chanin Nantasenamat (The Data Professor for hyperparameter optimization)
     parameter_n_estimators = st.sidebar.slider('Estimators', 0, 1000, 100, 100)
-    parameter_max_features = st.sidebar.select_slider('Max features', options=['auto', 'sqrt', 'log2']) 
+    parameter_max_features = st.sidebar.select_slider('Max features', options=['auto', 'sqrt', 'log2'])
     parameter_random_state = st.sidebar.slider('Seed number', 0, 1000, 500, 1)
 
 st.subheader('Dataset')
