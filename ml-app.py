@@ -143,16 +143,14 @@ def build_model(df):
     plt.legend(prop={'size':10}, loc='lower right')
     st.subheader('ROC Curves')
     st.pyplot(plt)
-    
+
 st.write("""
 # Biomarker GENiE
 ## Automatic Machine Learning and Feature Selection on Gene Expression Data
 
 """)
 st.write("Github code: https://github.com/andrewgcodes/geneRanker")
-image = Image.open('logo.png')
 
-st.sidebar.image(image, width=120,output_format='png')
 
 with st.sidebar.header('Upload Data (CSV only)'):
     uploaded_file = st.sidebar.file_uploader("Upload CSV file (features in columns, binary label (1 and 0) in final column, rows are samples)", type=["csv"])
