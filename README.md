@@ -7,3 +7,5 @@ Please attribute this repo if you use this tool.
 pip install streamlit
 
 streamlit run
+
+Web app (might be slow): http://biomarkergenie.herokuapp.com/
