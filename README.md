@@ -9,3 +9,5 @@ pip install streamlit
 streamlit run
 
 Web app (might be slow): http://biomarkergenie.herokuapp.com/
+
+Better to run locally
